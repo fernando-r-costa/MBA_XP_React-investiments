@@ -1,87 +1,43 @@
-import { investments, reports } from "../data/data";
+import { useState } from "react";
+import { processedData } from "../data/processedData";
 
 export default function Main() {
-  let reportsSort = [];
+  const [selectInvestment, setSelectInvestment] = useState("Fundo de Ações");
 
-  reportsSort = reports.sort((a, b) => a.month - b.month);
+  const filteredInvestment = processedData.filter((investment) => investment.description.includes(selectInvestment))
 
-  function getShortMonthName(monthNumber) {
-    const months = [
-      "jan",
-      "fev",
-      "mar",
-      "abr",
-      "mai",
-      "jun",
-      "jul",
-      "ago",
-      "set",
-      "out",
-      "nov",
-      "dez",
-    ];
-    return months[monthNumber - 1] || "";
-  }
-
-  function processInvestmentData(investments, reportsSort) {
-    const processedData = [];
-
-    investments.forEach((investment) => {
-      const investmentData = {
-        description: investment.description,
-        reports: [],
-        totalValueChange: 0,
-      };
-
-      const investmentReports = reportsSort.filter((report) =>
-        report.investmentId.includes(investment.id)
-      );
-
-      investmentReports.forEach((report, index) => {
-        const currentReport = {
-          month: getShortMonthName(report.month), // Obtém o nome abreviado do mês
-          year: report.year,
-          value: report.value,
-          percentChange: 0,
-        };
-
-        if (index > 0) {
-          const previousReport = investmentReports[index - 1];
-          currentReport.percentChange =
-            ((currentReport.value - previousReport.value) /
-              previousReport.value) *
-            100;
-        }
-
-        investmentData.reports.push(currentReport);
-
-        if (index === 0) {
-          investmentData.totalValueChange = currentReport.value;
-        } else if (index === investmentReports.length - 1) {
-          investmentData.totalValueChange =
-            currentReport.value - investmentData.reports[0].value;
-        }
-      });
-
-      processedData.push(investmentData);
-    });
-
-    return processedData;
-  }
-
-  const processedData = processInvestmentData(investments, reportsSort);
-  console.log("🚀 ~ file: Main.jsx:47 ~ Main ~ processedData:", processedData);
+  const onSelectInvestment = (event) => {
+    setSelectInvestment(event.target.value);
+  };
 
   return (
     <main className="container mx-auto mt-4">
-      {processedData.map((investment) => (
-        <div key={investment.id} className="my-2 border-2 rounded-sm">
+      <form className="flex flex-col items-center gap-2 text-lg">
+        <label htmlFor="investments">Escolha o investimento:</label>
+        <select
+          name="investments"
+          className="w-60 shadow-xl rounded-md p-1 bg-blue-100 cursor-pointer"
+          onChange={onSelectInvestment}
+        >
+          {processedData.map((investment, index) => (
+            <option key={index}>{investment.description}</option>
+          ))}
+        </select>
+      </form>
+      {filteredInvestment.map((investment, index) => (
+        <div key={index} className="my-2 border-2 rounded-sm">
           <h2 className="text-center font-bold text-xl p-1">
             {investment.description}
           </h2>
           <h3 className="text-center font-bold text-lg p-1">
             Rendimento total:
-            <span className={`${(investment.totalValueChange >= 0) ? 'text-green-600' : 'text-red-600'}`}>
+            <span
+              className={`${
+                investment.totalValueChange >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               {` R$ ${investment.totalValueChange.toLocaleString("pt-BR", {
                 maximumFractionDigits: 2,
               })}
@@ -91,27 +47,40 @@ export default function Main() {
             )} %)`}
             </span>
           </h3>
-          <table className="table-auto w-full my-2 border-b-2">
+          <table className="table-auto w-1/4 m-4">
             <tbody>
               {investment.reports.map((report, index) => (
-                <tr key={index}>
-                  <td className="pl-5 font-semibold">{`${report.month.toLocaleString(
+                <tr key={index} className={`leading-10 ${index % 2 === 0 ? 'bg-blue-100' : 'bg-white'}`}>
+                  <td className="w-20 text-right pl-5 font-semibold">{`${report.month.toLocaleString(
                     "pt-BR",
                     { month: "short" }
                   )}/${report.year}`}</td>
-                  <td className={`font-semibold pr-5 ${(report.percentChange >= 0) ? 'text-green-600' : 'text-red-600'}`}>
+                  <td
+                    className={`font-semibold pl-12 ${
+                      report.percentChange !== 0
+                        ? report.percentChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                        : ""
+                    }`}
+                  >
                     {`${report.value.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                       style: "currency",
                       currency: "BRL",
                     })}`}
                   </td>
-                  <td className={`text-right font-semibold pr-5 ${(report.percentChange >= 0) ? 'text-green-600' : 'text-red-600'}`}>{`${report.percentChange.toLocaleString(
-                    "pt-BR",
-                    {
-                      minimumFractionDigits: 2,
-                    }
-                  )} %`}</td>
+                  <td
+                    className={`w-20 text-right font-semibold ${
+                      report.percentChange !== 0
+                        ? report.percentChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                        : ""
+                    }`}
+                  >{`${report.percentChange.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })} %`}</td>
                 </tr>
               ))}
             </tbody>
