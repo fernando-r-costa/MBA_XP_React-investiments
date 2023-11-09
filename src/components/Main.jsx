@@ -4,7 +4,10 @@ import { processedData } from "../data/processedData";
 export default function Main() {
   const [selectInvestment, setSelectInvestment] = useState("Fundo de Ações");
 
-  const filteredInvestment = processedData.filter((investment) => investment.description.includes(selectInvestment))
+  const filteredInvestment = processedData.filter((investment) =>
+    investment.description.includes(selectInvestment)
+  );
+  console.log("🚀  filteredInvestment:", filteredInvestment);
 
   const onSelectInvestment = (event) => {
     setSelectInvestment(event.target.value);
@@ -47,44 +50,53 @@ export default function Main() {
             )} %)`}
             </span>
           </h3>
-          <table className="table-auto w-1/4 m-4">
-            <tbody>
-              {investment.reports.map((report, index) => (
-                <tr key={index} className={`leading-10 ${index % 2 === 0 ? 'bg-blue-100' : 'bg-white'}`}>
-                  <td className="w-20 text-right pl-5 font-semibold">{`${report.month.toLocaleString(
-                    "pt-BR",
-                    { month: "short" }
-                  )}/${report.year}`}</td>
-                  <td
-                    className={`font-semibold pl-12 ${
-                      report.percentChange !== 0
-                        ? report.percentChange >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                        : ""
+          <div className="flex justify-evenly">
+            <table className="table-auto w-1/4 m-4">
+              <tbody>
+                {investment.reports.map((report, index) => (
+                  <tr
+                    key={index}
+                    className={`leading-10 ${
+                      index % 2 === 0 ? "bg-blue-100" : "bg-white"
                     }`}
                   >
-                    {`${report.value.toLocaleString("pt-BR", {
+                    <td className="w-20 text-right pl-3 font-semibold">{`${report.month.toLocaleString(
+                      "pt-BR",
+                      { month: "short" }
+                    )}/${report.year}`}</td>
+                    <td
+                      className={`font-semibold pl-12 ${
+                        report.percentChange !== 0
+                          ? report.percentChange >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                          : ""
+                      }`}
+                    >
+                      {`${report.value.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        style: "currency",
+                        currency: "BRL",
+                      })}`}
+                    </td>
+                    <td
+                      className={`w-20 pr-3 text-right font-semibold ${
+                        report.percentChange !== 0
+                          ? report.percentChange >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                          : ""
+                      }`}
+                    >{`${report.percentChange.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
-                      style: "currency",
-                      currency: "BRL",
-                    })}`}
-                  </td>
-                  <td
-                    className={`w-20 text-right font-semibold ${
-                      report.percentChange !== 0
-                        ? report.percentChange >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                        : ""
-                    }`}
-                  >{`${report.percentChange.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })} %`}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    })} %`}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="m-4">
+            </div>
+          </div>
         </div>
       ))}
     </main>
